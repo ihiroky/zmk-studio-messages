@@ -1,0 +1,68 @@
+// Requests
+syntax = "proto3";
+
+package zmk.studio;
+
+import "meta.proto";
+import "core.proto";
+import "behaviors.proto";
+import "keymap.proto";
+
+// Generic extension arm.
+//
+// Third-party firmware modules register an RPC subsystem for `Extension` and
+// dispatch on (namespace, type). The payload is opaque to ZMK core: the
+// responsible module owns its codec. Keeping the arm inline in this file (and
+// the payload as opaque bytes) means ZMK's app/CMakeLists.txt nanopb proto list
+// does not have to change.
+message Extension {
+    // Logical grouping of RPCs, e.g. "dya.status" or "zmk.ext".
+    string namespace = 1;
+    // Operation id within the namespace.
+    uint32 type = 2;
+    // Codec-defined payload. Max size is set in studio.options.in.
+    bytes payload = 3;
+}
+
+// Step 0 sentinel: proves the forked zmk-studio-messages is the one being
+// compiled. Removed once the west override is verified.
+message SentinelStep0 {
+    bool ok = 1;
+}
+
+message Request {
+    uint32 request_id = 1;
+
+    oneof subsystem {
+        zmk.core.Request core = 3;
+        zmk.behaviors.Request behaviors = 4;
+        zmk.keymap.Request keymap = 5;
+        zmk.studio.Extension extension = 6;
+    }
+}
+
+message Response {
+    oneof type {
+        RequestResponse request_response = 1;
+        Notification notification = 2;
+    }
+}
+
+message RequestResponse {
+    uint32 request_id = 1;
+    oneof subsystem {
+        zmk.meta.Response meta = 2;
+        zmk.core.Response core = 3;
+        zmk.behaviors.Response behaviors = 4;
+        zmk.keymap.Response keymap = 5;
+        zmk.studio.Extension extension = 6;
+    }
+}
+
+message Notification {
+    oneof subsystem {
+        zmk.core.Notification core = 2;
+        zmk.keymap.Notification keymap = 5;
+        zmk.studio.Extension extension = 6;
+    }
+}

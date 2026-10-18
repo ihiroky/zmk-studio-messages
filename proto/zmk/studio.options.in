@@ -1,0 +1,10 @@
+# Nanopb options for studio.proto
+#
+# The generic Extension arm uses fixed max_size values (not @CONFIG_...@
+# placeholders): this file lives in the zmk-studio-messages fork and is
+# processed by ZMK's nanopb configure_file() step. Referencing a Kconfig symbol
+# here would make the generated options depend on a module being present, so a
+# build without the extension module would fail. Keep these constant.
+
+zmk.studio.Extension.namespace max_size:32
+zmk.studio.Extension.payload   max_size:256
